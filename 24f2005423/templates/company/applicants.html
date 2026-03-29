@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block title %}Applicants – PlaceIITM{% endblock %}
+{% block page_title %}Drive Applicants{% endblock %}
+
+{% block content %}
+<!-- Drive Info -->
+<div style="background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:14px;padding:24px;margin-bottom:24px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">
+        <div>
+            <div style="font-size:12px;color:var(--accent-light);text-transform:uppercase;letter-spacing:0.8px">Drive Details</div>
+            <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--text-primary);margin-top:4px">{{ drive.job_title }}</div>
+            <div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap">
+                {% if drive.package %}<span style="font-size:13px;color:var(--green)"><i class="bi bi-currency-rupee"></i> {{ drive.package }}</span>{% endif %}
+                {% if drive.location %}<span style="font-size:13px;color:var(--text-secondary)"><i class="bi bi-geo-alt"></i> {{ drive.location }}</span>{% endif %}
+                {% if drive.application_deadline %}<span style="font-size:13px;color:var(--text-secondary)"><i class="bi bi-calendar3"></i> {{ drive.application_deadline }}</span>{% endif %}
+            </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+            <span class="badge-custom badge-{{ drive.status }}">{{ drive.status.title() }}</span>
+            <a href="{{ url_for('company_dashboard') }}" class="btn-ghost"><i class="bi bi-arrow-left"></i> Back</a>
+        </div>
+    </div>
+</div>
+
+<div class="data-card">
+    <div class="data-card-header">
+        <div class="data-card-title">Applicants ({{ applicants|length }})</div>
+    </div>
+    {% if applicants %}
+    <table class="custom-table">
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Roll No</th>
+                <th>Branch</th>
+                <th>CGPA</th>
+                <th>Phone</th>
+                <th>Resume</th>
+                <th>Applied</th>
+                <th>Status</th>
+                <th>Update</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for a in applicants %}
+            <tr>
+                <td>
+                    <div style="color:var(--text-primary);font-weight:600">{{ a.name }}</div>
+                    <div style="font-size:11px;color:var(--text-muted)">{{ a.email }}</div>
+                </td>
+                <td>{{ a.roll_no or '&ndash;' }}</td>
+                <td>{{ a.branch or '&ndash;' }}</td>
+                <td class="{% if a.cgpa and a.cgpa >= 8 %}cgpa-high{% elif a.cgpa and a.cgpa >= 6 %}cgpa-medium{% else %}cgpa-low{% endif %}">
+                    {{ a.cgpa or '&ndash;' }}
+                </td>
+                <td class="phone-cell">{{ a.phone or '&ndash;' }}</td>
+                <td>
+                    {% if a.resume %}
+                    <a href="/static/uploads/{{ a.resume }}" target="_blank" class="btn-ghost" style="font-size:12px;padding:4px 10px"><i class="bi bi-file-pdf"></i> View</a>
+                    {% else %}&ndash;{% endif %}
+                </td>
+                <td style="font-size:12px">{{ a.applied_date }}</td>
+                <td><span class="badge-custom badge-{{ a.status }}">{{ a.status.title() }}</span></td>
+                <td>
+                    <form method="POST" action="{{ url_for('update_application_status', aid=a.id) }}" style="display:flex;gap:6px;align-items:center">
+                        <select name="status" class="form-select-custom" style="min-width:130px;padding:6px 10px;font-size:12px">
+                            <option value="applied" {% if a.status=='applied' %}selected{% endif %}>Applied</option>
+                            <option value="shortlisted" {% if a.status=='shortlisted' %}selected{% endif %}>Shortlisted</option>
+                            <option value="selected" {% if a.status=='selected' %}selected{% endif %}>Selected</option>
+                            <option value="rejected" {% if a.status=='rejected' %}selected{% endif %}>Rejected</option>
+                        </select>
+                        <button type="submit" class="btn-accent" style="padding:6px 12px;font-size:12px"><i class="bi bi-check-lg"></i></button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div style="padding:60px;text-align:center;color:var(--text-muted)">
+        <i class="bi bi-inbox" style="font-size:48px;display:block;margin-bottom:16px"></i>
+        No applicants yet for this drive
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

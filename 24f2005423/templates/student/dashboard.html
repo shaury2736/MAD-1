@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% block title %}Student Dashboard – PlaceIITM{% endblock %}
+{% block page_title %}Student Dashboard{% endblock %}
+
+{% block content %}
+<!-- Student Profile Banner -->
+<div style="background:linear-gradient(135deg,rgba(79,142,247,0.08),rgba(245,200,66,0.05));
+    border:1px solid var(--border);border-radius:16px;padding:24px 28px;margin-bottom:28px;
+    display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
+    <div style="display:flex;align-items:center;gap:20px">
+        <div style="width:60px;height:60px;border-radius:16px;background:linear-gradient(135deg,var(--accent),var(--gold));
+            display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:white;flex-shrink:0">
+            {{ student.name[0].upper() }}
+        </div>
+        <div>
+            <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--text-primary)">{{ student.name }}</div>
+            <div style="font-size:13px;color:var(--text-secondary)">{{ student.roll_no or 'No roll no' }} &nbsp;·&nbsp; {{ student.branch or 'No branch' }}</div>
+            <div style="font-size:13px;color:var(--accent-light)">CGPA: <strong>{{ student.cgpa or '—' }}</strong></div>
+        </div>
+    </div>
+    <div style="display:flex;gap:10px">
+        <a href="{{ url_for('student_profile') }}" class="btn-ghost"><i class="bi bi-pencil"></i> Edit Profile</a>
+        {% if not student.resume %}
+        <a href="{{ url_for('student_profile') }}" class="btn-accent"><i class="bi bi-upload"></i> Upload Resume</a>
+        {% else %}
+        <a href="/static/uploads/{{ student.resume }}" target="_blank" class="btn-ghost"><i class="bi bi-file-pdf"></i> My Resume</a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Tabs -->
+<ul class="nav" id="dashTabs" style="border-bottom:1px solid var(--border-subtle);margin-bottom:24px;gap:4px">
+    <li class="nav-item">
+        <a class="nav-link active" id="drives-tab" data-bs-toggle="tab" href="#drives-pane"
+           style="color:var(--text-secondary);border:none;background:none;padding:10px 20px;border-radius:8px 8px 0 0;font-size:14px;cursor:pointer">
+            <i class="bi bi-briefcase"></i> Open Drives <span style="background:rgba(79,142,247,0.2);color:var(--accent);padding:1px 8px;border-radius:10px;font-size:11px;margin-left:4px">{{ drives|selectattr('applied','none')|list|length }}</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" id="apps-tab" data-bs-toggle="tab" href="#apps-pane"
+           style="color:var(--text-secondary);border:none;background:none;padding:10px 20px;border-radius:8px 8px 0 0;font-size:14px;cursor:pointer">
+            <i class="bi bi-file-text"></i> My Applications <span style="background:rgba(79,142,247,0.2);color:var(--accent);padding:1px 8px;border-radius:10px;font-size:11px;margin-left:4px">{{ my_apps|length }}</span>
+        </a>
+    </li>
+</ul>
+
+<div class="tab-content">
+    <!-- Open Drives -->
+    <div class="tab-pane fade show active" id="drives-pane">
+        {% if drives %}
+        <div class="row g-4">
+            {% for d in drives %}
+            <div class="col-md-6 col-xl-4">
+                <div class="drive-card">
+                    <div class="drive-card-top">
+                        <div>
+                            <div class="drive-company">{{ d.company_name }}</div>
+                            <div class="drive-title">{{ d.job_title }}</div>
+                        </div>
+                        {% if d.applied %}
+                        <span class="badge-custom badge-applied" style="flex-shrink:0">Applied</span>
+                        {% endif %}
+                    </div>
+
+                    {% if d.job_description %}
+                    <div style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin-top:8px">
+                        {{ d.job_description[:120] }}{% if d.job_description|length > 120 %}...{% endif %}
+                    </div>
+                    {% endif %}
+
+                    <div class="drive-meta">
+                        {% if d.package %}<span class="drive-meta-item" style="color:var(--green)"><i class="bi bi-currency-rupee"></i> {{ d.package }}</span>{% endif %}
+                        {% if d.location %}<span class="drive-meta-item"><i class="bi bi-geo-alt"></i> {{ d.location }}</span>{% endif %}
+                        {% if d.application_deadline %}<span class="drive-meta-item"><i class="bi bi-calendar3"></i> {{ d.application_deadline }}</span>{% endif %}
+                        <span class="drive-meta-item"><i class="bi bi-people"></i> {{ d.applicant_count }} applied</span>
+                    </div>
+
+                    {% if d.eligibility_criteria %}
+                    <div style="margin-top:12px;font-size:12px;color:var(--text-muted);background:rgba(255,255,255,0.03);border-radius:8px;padding:8px 12px">
+                        <strong style="color:var(--text-secondary)">Eligibility:</strong> {{ d.eligibility_criteria[:80] }}{% if d.eligibility_criteria|length > 80 %}...{% endif %}
+                    </div>
+                    {% endif %}
+
+                    <div style="margin-top:16px">
+                        {% if d.applied %}
+                        <button class="btn-ghost" style="width:100%;justify-content:center;cursor:not-allowed;opacity:0.6" disabled>
+                            <i class="bi bi-check-circle"></i> Already Applied
+                        </button>
+                        {% else %}
+                        <form method="POST" action="{{ url_for('apply_drive', did=d.id) }}">
+                            <button type="submit" class="btn-accent" style="width:100%;justify-content:center">
+                                <i class="bi bi-send"></i> Apply Now
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div style="padding:60px;text-align:center;color:var(--text-muted)">
+            <i class="bi bi-briefcase" style="font-size:48px;display:block;margin-bottom:16px"></i>
+            No approved drives available right now. Check back soon!
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- My Applications -->
+    <div class="tab-pane fade" id="apps-pane">
+        {% if my_apps %}
+        <div class="data-card">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>Company</th>
+                        <th>Job Title</th>
+                        <th>Package</th>
+                        <th>Location</th>
+                        <th>Applied Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in my_apps %}
+                    <tr>
+                        <td style="color:var(--text-primary);font-weight:600">{{ a.company_name }}</td>
+                        <td>{{ a.job_title }}</td>
+                        <td style="color:var(--green)">{{ a.package or '—' }}</td>
+                        <td>{{ a.location or '—' }}</td>
+                        <td style="font-size:12px">{{ a.applied_date }}</td>
+                        <td><span class="badge-custom badge-{{ a.status }}">{{ a.status.title() }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div style="padding:60px;text-align:center;color:var(--text-muted)">
+            <i class="bi bi-file-earmark-text" style="font-size:48px;display:block;margin-bottom:16px"></i>
+            You haven't applied to any drives yet
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

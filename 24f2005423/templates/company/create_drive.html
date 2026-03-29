@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Create Drive – PlaceIITM{% endblock %}
+{% block page_title %}Create Placement Drive{% endblock %}
+
+{% block content %}
+<div style="max-width:680px">
+    <div class="data-card">
+        <div class="data-card-header">
+            <div class="data-card-title"><i class="bi bi-plus-circle" style="color:var(--accent)"></i> New Placement Drive</div>
+        </div>
+        <div style="padding:32px">
+            <form method="POST">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label-custom">Job Title *</label>
+                        <input name="job_title" type="text" class="form-control-custom" placeholder="e.g. Software Engineer – Backend" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label-custom">Package / CTC</label>
+                        <input name="package" type="text" class="form-control-custom" placeholder="e.g. 12 LPA, 8–15 LPA">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label-custom">Location</label>
+                        <input name="location" type="text" class="form-control-custom" placeholder="e.g. Bangalore / Remote">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label-custom">Application Deadline</label>
+                        <input name="application_deadline" type="date" class="form-control-custom">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label-custom">Eligibility Criteria</label>
+                        <textarea name="eligibility_criteria" class="form-control-custom" placeholder="e.g. CGPA ≥ 7.0, CS/EE branch, 2025 graduating batch…"></textarea>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label-custom">Job Description *</label>
+                        <textarea name="job_description" class="form-control-custom" style="min-height:150px" placeholder="Describe the role, responsibilities, and what you're looking for…" required></textarea>
+                    </div>
+                    <div class="col-12" style="display:flex;gap:12px;margin-top:8px">
+                        <button type="submit" class="btn-accent"><i class="bi bi-send"></i> Submit for Approval</button>
+                        <a href="{{ url_for('company_dashboard') }}" class="btn-ghost">Cancel</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

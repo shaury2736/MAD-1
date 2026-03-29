@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PlaceIITM – Campus Placement Portal{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,300&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% if session.user_id %}
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="sidebar-brand">
+            <a href="/" class="brand-logo">
+                <div class="brand-icon">P</div>
+                <div class="brand-text">
+                    <span class="brand-name">PlaceIITM</span>
+                    <span class="brand-sub">Campus Portal</span>
+                </div>
+            </a>
+        </div>
+
+        <div class="sidebar-user">
+            <div class="user-pill">
+                <div class="user-avatar">{{ session.name[0].upper() }}</div>
+                <div class="user-info">
+                    <div class="user-name">{{ session.name[:20] }}</div>
+                    <div class="user-role">{{ session.role }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar-nav">
+            {% if session.role == 'admin' %}
+            <div class="nav-section-label">Overview</div>
+            <a href="{{ url_for('admin_dashboard') }}" class="nav-item-link {% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
+                <i class="bi bi-grid"></i> Dashboard
+            </a>
+            <div class="nav-section-label" style="margin-top:8px">Manage</div>
+            <a href="{{ url_for('admin_companies') }}" class="nav-item-link {% if request.endpoint == 'admin_companies' %}active{% endif %}">
+                <i class="bi bi-building"></i> Companies
+            </a>
+            <a href="{{ url_for('admin_students') }}" class="nav-item-link {% if request.endpoint == 'admin_students' %}active{% endif %}">
+                <i class="bi bi-people"></i> Students
+            </a>
+            <a href="{{ url_for('admin_drives') }}" class="nav-item-link {% if request.endpoint == 'admin_drives' %}active{% endif %}">
+                <i class="bi bi-briefcase"></i> Placement Drives
+            </a>
+            <a href="{{ url_for('admin_applications') }}" class="nav-item-link {% if request.endpoint == 'admin_applications' %}active{% endif %}">
+                <i class="bi bi-file-earmark-text"></i> Applications
+            </a>
+
+            {% elif session.role == 'company' %}
+            <div class="nav-section-label">Overview</div>
+            <a href="{{ url_for('company_dashboard') }}" class="nav-item-link {% if request.endpoint == 'company_dashboard' %}active{% endif %}">
+                <i class="bi bi-grid"></i> Dashboard
+            </a>
+            <div class="nav-section-label" style="margin-top:8px">Drives</div>
+            <a href="{{ url_for('create_drive') }}" class="nav-item-link {% if request.endpoint == 'create_drive' %}active{% endif %}">
+                <i class="bi bi-plus-circle"></i> Create Drive
+            </a>
+
+            {% elif session.role == 'student' %}
+            <div class="nav-section-label">Overview</div>
+            <a href="{{ url_for('student_dashboard') }}" class="nav-item-link {% if request.endpoint == 'student_dashboard' %}active{% endif %}">
+                <i class="bi bi-grid"></i> Dashboard
+            </a>
+            <div class="nav-section-label" style="margin-top:8px">Profile</div>
+            <a href="{{ url_for('student_profile') }}" class="nav-item-link {% if request.endpoint == 'student_profile' %}active{% endif %}">
+                <i class="bi bi-person"></i> My Profile
+            </a>
+            {% endif %}
+        </div>
+
+        <div class="sidebar-footer">
+            <form action="{{ url_for('logout') }}" method="get">
+                <button type="submit" class="logout-btn">
+                    <i class="bi bi-box-arrow-left"></i> Log Out
+                </button>
+            </form>
+        </div>
+    </nav>
+
+    <!-- Main -->
+    <div class="main-wrapper">
+        <div class="topbar">
+            <div class="topbar-title">{% block page_title %}Dashboard{% endblock %}</div>
+            <div class="topbar-right">
+                <span style="font-size:13px; color: var(--text-muted);">
+                    <i class="bi bi-calendar3"></i>
+                    <span id="current-date"></span>
+                </span>
+            </div>
+        </div>
+
+        <div class="content-area">
+            {% for cat, msg in get_flashed_messages(with_categories=True) %}
+            <div class="alert-custom alert-{{ cat }}">
+                <i class="bi bi-{% if cat == 'success' %}check-circle{% elif cat == 'danger' %}exclamation-triangle{% elif cat == 'warning' %}exclamation-circle{% else %}info-circle{% endif %}"></i>
+                {{ msg }}
+            </div>
+            {% endfor %}
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+    {% else %}
+    <div class="public-layout">
+        {% block public_content %}{% endblock %}
+    </div>
+    {% endif %}
+
+    <script>
+        const d = new Date();
+        const el = document.getElementById('current-date');
+        if(el) el.textContent = d.toLocaleDateString('en-IN', {weekday:'short', day:'numeric', month:'short', year:'numeric'});
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

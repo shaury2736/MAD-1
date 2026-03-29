@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% block title %}Company Dashboard – PlaceIITM{% endblock %}
+{% block page_title %}Company Dashboard{% endblock %}
+
+{% block content %}
+<!-- Company Profile Card -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-4">
+        <div class="data-card h-100">
+            <div style="padding:28px;text-align:center">
+                <div style="width:72px;height:72px;border-radius:18px;background:linear-gradient(135deg,rgba(245,200,66,0.2),rgba(79,142,247,0.2));
+                    border:1px solid var(--border);display:flex;align-items:center;justify-content:center;
+                    font-size:30px;margin:0 auto 16px;color:var(--gold)">
+                    <i class="bi bi-building"></i>
+                </div>
+                <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--text-primary)">{{ company.company_name }}</div>
+                <div style="font-size:13px;color:var(--text-muted);margin-top:4px">{{ company.industry or 'Technology' }}</div>
+                <div style="margin:16px 0"><span class="badge-custom badge-{{ company.approval_status }}">{{ company.approval_status.title() }}</span></div>
+                {% if company.hr_contact %}
+                <div style="font-size:13px;color:var(--text-secondary)"><i class="bi bi-telephone"></i> {{ company.hr_contact }}</div>
+                {% endif %}
+                {% if company.website %}
+                <div style="font-size:13px;color:var(--accent-light);margin-top:4px">
+                    <a href="{{ company.website }}" target="_blank" style="color:inherit;text-decoration:none"><i class="bi bi-globe"></i> {{ company.website[:30] }}</a>
+                </div>
+                {% endif %}
+                {% if company.description %}
+                <div style="margin-top:16px;font-size:13px;color:var(--text-secondary);line-height:1.6;text-align:left;background:var(--accent-glow);border-radius:10px;padding:12px">
+                    {{ company.description[:150] }}{% if company.description|length > 150 %}...{% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <!-- Stats -->
+        <div class="row g-3 mb-4">
+            <div class="col-4">
+                <div class="stat-card">
+                    <div class="stat-icon gold"><i class="bi bi-briefcase"></i></div>
+                    <div class="stat-value">{{ drives|length }}</div>
+                    <div class="stat-label">Total Drives</div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="stat-card">
+                    <div class="stat-icon green"><i class="bi bi-check-circle"></i></div>
+                    <div class="stat-value">{{ drives|selectattr('status','eq','approved')|list|length }}</div>
+                    <div class="stat-label">Active Drives</div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="stat-card">
+                    <div class="stat-icon blue"><i class="bi bi-people"></i></div>
+                    <div class="stat-value">{{ drives|sum(attribute='applicant_count') }}</div>
+                    <div class="stat-label">Total Applicants</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Create Drive CTA -->
+        <div style="background:linear-gradient(135deg,rgba(79,142,247,0.08),rgba(245,200,66,0.05));
+            border:1px solid var(--border);border-radius:14px;padding:24px;display:flex;align-items:center;justify-content:space-between">
+            <div>
+                <div style="font-size:16px;font-weight:600;color:var(--text-primary)">Post a New Drive</div>
+                <div style="font-size:13px;color:var(--text-secondary);margin-top:4px">Create a job posting for IITM students</div>
+            </div>
+            <a href="{{ url_for('create_drive') }}" class="btn-accent"><i class="bi bi-plus-lg"></i> Create Drive</a>
+        </div>
+    </div>
+</div>
+
+<!-- Drives List -->
+<div class="data-card">
+    <div class="data-card-header">
+        <div class="data-card-title">My Placement Drives</div>
+        <a href="{{ url_for('create_drive') }}" class="btn-accent" style="font-size:13px"><i class="bi bi-plus"></i> New Drive</a>
+    </div>
+    {% if drives %}
+    <table class="custom-table">
+        <thead>
+            <tr>
+                <th>Job Title</th>
+                <th>Package</th>
+                <th>Location</th>
+                <th>Deadline</th>
+                <th>Applicants</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for d in drives %}
+            <tr>
+                <td style="color:var(--text-primary);font-weight:600">{{ d.job_title }}</td>
+                <td style="color:var(--green)">{{ d.package or '—' }}</td>
+                <td>{{ d.location or '—' }}</td>
+                <td style="font-size:12px">{{ d.application_deadline or '—' }}</td>
+                <td>
+                    <a href="{{ url_for('drive_applicants', did=d.id) }}" style="color:var(--accent);text-decoration:none;font-weight:500">
+                        {{ d.applicant_count }} <i class="bi bi-arrow-right-short"></i>
+                    </a>
+                </td>
+                <td><span class="badge-custom badge-{{ d.status }}">{{ d.status.title() }}</span></td>
+                <td>
+                    <div style="display:flex;gap:6px">
+                        <a href="{{ url_for('drive_applicants', did=d.id) }}" class="btn-ghost" style="font-size:12px;padding:5px 10px"><i class="bi bi-people"></i></a>
+                        <a href="{{ url_for('edit_drive', did=d.id) }}" class="btn-ghost" style="font-size:12px;padding:5px 10px"><i class="bi bi-pencil"></i></a>
+                        {% if d.status != 'closed' %}
+                        <form method="POST" action="{{ url_for('close_drive', did=d.id) }}" style="display:inline">
+                            <button type="submit" class="btn-ghost" style="font-size:12px;padding:5px 10px" title="Close Drive"><i class="bi bi-x-circle"></i></button>
+                        </form>
+                        {% endif %}
+                        <form method="POST" action="{{ url_for('delete_drive', did=d.id) }}" style="display:inline" onsubmit="return confirm('Delete this drive?')">
+                            <button type="submit" class="btn-danger-ghost" style="font-size:12px;padding:5px 10px"><i class="bi bi-trash3"></i></button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div style="padding:60px;text-align:center;color:var(--text-muted)">
+        <i class="bi bi-briefcase" style="font-size:48px;display:block;margin-bottom:16px"></i>
+        No drives yet. <a href="{{ url_for('create_drive') }}" style="color:var(--accent-light)">Create your first drive</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block title %}Manage Students – PlaceIITM{% endblock %}
+{% block page_title %}Students{% endblock %}
+
+{% block content %}
+<div class="data-card">
+    <div class="data-card-header">
+        <div class="data-card-title">All Students</div>
+        <form method="GET" class="search-bar">
+            <input type="text" name="q" value="{{ q }}" class="search-input" placeholder="Search by name, ID, or email…">
+            <button type="submit" class="btn-accent"><i class="bi bi-search"></i> Search</button>
+            {% if q %}<a href="{{ url_for('admin_students') }}" class="btn-ghost">Clear</a>{% endif %}
+        </form>
+    </div>
+
+    {% if students %}
+    <table class="custom-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Student</th>
+                <th>Roll No</th>
+                <th>Branch</th>
+                <th>CGPA</th>
+                <th>Phone</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in students %}
+            <tr>
+                <td style="color:var(--text-muted);font-size:12px">#{{ s.id }}</td>
+                <td>
+                    <div style="color:var(--text-primary);font-weight:600">{{ s.name }}</div>
+                    <div style="font-size:12px;color:var(--text-muted)">{{ s.email }}</div>
+                </td>
+                <td>{{ s.roll_no or '—' }}</td>
+                <td>{{ s.branch or '—' }}</td>
+                <td>
+                    {% if s.cgpa %}
+                    <span class="{% if s.cgpa >= 8 %}cgpa-high{% elif s.cgpa >= 6 %}cgpa-medium{% else %}cgpa-low{% endif %}">
+                        {{ s.cgpa }}
+                    </span>
+                    {% else %}&ndash;{% endif %}
+                </td>
+                <td>{{ s.phone or '&ndash;' }}</td>
+                <td>
+                    {% if s.is_blacklisted %}
+                    <span class="badge-custom badge-blacklisted">Blacklisted</span>
+                    {% else %}
+                    <span class="badge-custom badge-approved">Active</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="action-buttons">
+                        {% if s.is_blacklisted %}
+                        <form method="POST" action="{{ url_for('admin_student_action', sid=s.id) }}" style="display:inline">
+                            <input type="hidden" name="action" value="activate">
+                            <button type="submit" class="btn-success-ghost"><i class="bi bi-person-check"></i> Activate</button>
+                        </form>
+                        {% else %}
+                        <form method="POST" action="{{ url_for('admin_student_action', sid=s.id) }}" style="display:inline">
+                            <input type="hidden" name="action" value="blacklist">
+                            <button type="submit" class="btn-danger-ghost"><i class="bi bi-person-slash"></i> Blacklist</button>
+                        </form>
+                        {% endif %}
+                        <form method="POST" action="{{ url_for('admin_student_delete', sid=s.id) }}" style="display:inline" onsubmit="return confirm('Delete this student?')">
+                            <button type="submit" class="btn-danger-ghost"><i class="bi bi-trash3"></i></button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div style="padding:60px;text-align:center;color:var(--text-muted)">
+        <i class="bi bi-people" style="font-size:48px;display:block;margin-bottom:16px"></i>
+        No students found{% if q %} for "{{ q }}"{% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

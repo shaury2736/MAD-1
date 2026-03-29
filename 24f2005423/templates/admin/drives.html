@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}Placement Drives – PlaceIITM{% endblock %}
+{% block page_title %}Placement Drives{% endblock %}
+
+{% block content %}
+<div class="data-card">
+    <div class="data-card-header">
+        <div class="data-card-title">All Placement Drives</div>
+    </div>
+
+    {% if drives %}
+    <table class="custom-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Job Title</th>
+                <th>Company</th>
+                <th>Package</th>
+                <th>Location</th>
+                <th>Deadline</th>
+                <th>Applicants</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for d in drives %}
+            <tr>
+                <td style="color:var(--text-muted);font-size:12px">#{{ d.id }}</td>
+                <td style="color:var(--text-primary);font-weight:600">{{ d.job_title }}</td>
+                <td>{{ d.company_name }}</td>
+                <td style="color:var(--green)">{{ d.package or '—' }}</td>
+                <td>{{ d.location or '—' }}</td>
+                <td style="font-size:12px">{{ d.application_deadline or '—' }}</td>
+                <td>
+                    <span style="background:rgba(79,142,247,0.1);color:var(--accent);padding:3px 10px;border-radius:20px;font-size:12px">
+                        {{ d.applicant_count }}
+                    </span>
+                </td>
+                <td><span class="badge-custom badge-{{ d.status }}">{{ d.status.title() }}</span></td>
+                <td>
+                    <div style="display:flex;gap:6px">
+                        {% if d.status == 'pending' %}
+                        <form method="POST" action="{{ url_for('admin_drive_action', did=d.id) }}" style="display:inline">
+                            <input type="hidden" name="action" value="approve">
+                            <button type="submit" class="btn-success-ghost"><i class="bi bi-check-lg"></i> Approve</button>
+                        </form>
+                        <form method="POST" action="{{ url_for('admin_drive_action', did=d.id) }}" style="display:inline">
+                            <input type="hidden" name="action" value="reject">
+                            <button type="submit" class="btn-danger-ghost"><i class="bi bi-x-lg"></i> Reject</button>
+                        </form>
+                        {% else %}
+                        <span style="font-size:12px;color:var(--text-muted)">—</span>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div style="padding:60px;text-align:center;color:var(--text-muted)">
+        <i class="bi bi-briefcase" style="font-size:48px;display:block;margin-bottom:16px"></i>
+        No placement drives found
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

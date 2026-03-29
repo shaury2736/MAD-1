@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block public_content %}
+
+<div class="auth-wrapper">
+    <div class="auth-left">
+        <div class="auth-logo">
+            <div class="brand-icon" style="width:40px;height:40px;background:linear-gradient(135deg,var(--accent),var(--gold));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;color:white;font-weight:700">P</div>
+            <span style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--text-primary)">PlaceIITM</span>
+        </div>
+
+        <h1 class="auth-title">Welcome Back</h1>
+        <p class="auth-sub">Sign in to your placement portal account.</p>
+
+        {% for cat, msg in get_flashed_messages(with_categories=True) %}
+        <div class="alert-custom alert-{{ cat }}" style="margin-bottom:20px">
+            <i class="bi bi-{% if cat == 'success' %}check-circle{% elif cat == 'danger' %}exclamation-triangle{% elif cat == 'warning' %}exclamation-circle{% else %}info-circle{% endif %}"></i>
+            {{ msg }}
+        </div>
+        {% endfor %}
+
+        <!-- Role tabs -->
+        <div class="role-tabs" id="roleTabs">
+            <button class="role-tab active" onclick="setRole('admin', this)"><i class="bi bi-shield-lock"></i> Admin</button>
+            <button class="role-tab" onclick="setRole('company', this)"><i class="bi bi-building"></i> Company</button>
+            <button class="role-tab" onclick="setRole('student', this)"><i class="bi bi-mortarboard"></i> Student</button>
+        </div>
+
+        <div class="credential-hint" id="adminHint">
+            <strong>Demo Admin:</strong> admin@iitm.ac.in &nbsp;|&nbsp; <strong>Password:</strong> admin123
+        </div>
+
+        <form method="POST" action="{{ url_for('login') }}">
+            <input type="hidden" name="role" id="roleInput" value="admin">
+            <div class="form-group">
+                <label class="form-label-custom">Email Address</label>
+                <input type="email" name="email" class="form-control-custom" placeholder="you@example.com" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label-custom">Password</label>
+                <input type="password" name="password" class="form-control-custom" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn-accent" style="width:100%;justify-content:center;padding:13px">
+                <i class="bi bi-box-arrow-in-right"></i> Sign In
+            </button>
+        </form>
+
+        <div class="auth-alt">
+            New student? <a href="{{ url_for('register_student') }}">Register here</a> &nbsp;|&nbsp;
+            Company? <a href="{{ url_for('register_company') }}">Sign up here</a>
+        </div>
+        <div style="margin-top:24px;text-align:center">
+            <a href="{{ url_for('index') }}" class="btn-ghost" style="font-size:13px"><i class="bi bi-arrow-left"></i> Back to Home</a>
+        </div>
+    </div>
+
+    <div class="auth-right">
+        <div class="illustration-card">
+            <span class="illustration-icon">🎓</span>
+            <div class="illustration-title">Launch Your Career</div>
+            <p class="illustration-text">The IITM Placement Portal connects brilliant students with India's top companies. Your dream job is just a few clicks away.</p>
+            <div style="margin-top:24px;display:flex;gap:12px;justify-content:center">
+                <div style="text-align:center">
+                    <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--accent)">500+</div>
+                    <div style="font-size:11px;color:var(--text-muted)">Placed</div>
+                </div>
+                <div style="width:1px;background:var(--border-subtle)"></div>
+                <div style="text-align:center">
+                    <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--gold)">120+</div>
+                    <div style="font-size:11px;color:var(--text-muted)">Companies</div>
+                </div>
+                <div style="width:1px;background:var(--border-subtle)"></div>
+                <div style="text-align:center">
+                    <div style="font-family:'Playfair Display',serif;font-size:24px;font-weight:700;color:var(--green)">95%</div>
+                    <div style="font-size:11px;color:var(--text-muted)">Rate</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function setRole(role, el) {
+    document.getElementById('roleInput').value = role;
+    document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('adminHint').style.display = role === 'admin' ? 'block' : 'none';
+}
+</script>
+{% endblock %}

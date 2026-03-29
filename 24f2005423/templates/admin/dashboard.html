@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard – PlaceIITM{% endblock %}
+{% block page_title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<!-- Stats Grid -->
+<div class="row g-4 mb-4">
+    <div class="col-sm-6 col-xl-2">
+        <div class="stat-card">
+            <div class="stat-icon blue"><i class="bi bi-people-fill"></i></div>
+            <div class="stat-value">{{ stats.students }}</div>
+            <div class="stat-label">Total Students</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-2">
+        <div class="stat-card">
+            <div class="stat-icon gold"><i class="bi bi-building"></i></div>
+            <div class="stat-value">{{ stats.companies }}</div>
+            <div class="stat-label">Active Companies</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-2">
+        <div class="stat-card">
+            <div class="stat-icon green"><i class="bi bi-briefcase-fill"></i></div>
+            <div class="stat-value">{{ stats.drives }}</div>
+            <div class="stat-label">Placement Drives</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-2">
+        <div class="stat-card">
+            <div class="stat-icon blue"><i class="bi bi-file-text-fill"></i></div>
+            <div class="stat-value">{{ stats.applications }}</div>
+            <div class="stat-label">Applications</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-2">
+        <div class="stat-card">
+            <div class="stat-icon orange"><i class="bi bi-hourglass-split"></i></div>
+            <div class="stat-value">{{ stats.pending_companies }}</div>
+            <div class="stat-label">Pending Companies</div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-2">
+        <div class="stat-card">
+            <div class="stat-icon orange"><i class="bi bi-clock-history"></i></div>
+            <div class="stat-value">{{ stats.pending_drives }}</div>
+            <div class="stat-label">Pending Drives</div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions + Recent Activity -->
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="data-card h-100">
+            <div class="data-card-header">
+                <div class="data-card-title">Quick Actions</div>
+            </div>
+            <div style="padding:20px;display:flex;flex-direction:column;gap:12px">
+                <a href="{{ url_for('admin_companies') }}?filter=pending" class="nav-item-link" style="background:rgba(249,115,22,0.05);border:1px solid rgba(249,115,22,0.15)">
+                    <i class="bi bi-building-check" style="color:var(--orange)"></i>
+                    <div>
+                        <div style="font-size:14px;color:var(--text-primary);font-weight:500">Review Companies</div>
+                        <div style="font-size:12px;color:var(--text-muted)">{{ stats.pending_companies }} pending approval</div>
+                    </div>
+                </a>
+                <a href="{{ url_for('admin_drives') }}" class="nav-item-link" style="background:rgba(79,142,247,0.05);border:1px solid rgba(79,142,247,0.15)">
+                    <i class="bi bi-briefcase-fill" style="color:var(--accent)"></i>
+                    <div>
+                        <div style="font-size:14px;color:var(--text-primary);font-weight:500">Review Drives</div>
+                        <div style="font-size:12px;color:var(--text-muted)">{{ stats.pending_drives }} pending approval</div>
+                    </div>
+                </a>
+                <a href="{{ url_for('admin_students') }}" class="nav-item-link" style="background:rgba(34,197,94,0.05);border:1px solid rgba(34,197,94,0.15)">
+                    <i class="bi bi-people-fill" style="color:var(--green)"></i>
+                    <div>
+                        <div style="font-size:14px;color:var(--text-primary);font-weight:500">Manage Students</div>
+                        <div style="font-size:12px;color:var(--text-muted)">{{ stats.students }} students total</div>
+                    </div>
+                </a>
+                <a href="{{ url_for('admin_applications') }}" class="nav-item-link" style="background:rgba(245,200,66,0.05);border:1px solid rgba(245,200,66,0.15)">
+                    <i class="bi bi-file-earmark-text-fill" style="color:var(--gold)"></i>
+                    <div>
+                        <div style="font-size:14px;color:var(--text-primary);font-weight:500">All Applications</div>
+                        <div style="font-size:12px;color:var(--text-muted)">View complete history</div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="data-card">
+            <div class="data-card-header">
+                <div class="data-card-title">Recent Applications</div>
+                <a href="{{ url_for('admin_applications') }}" class="btn-ghost" style="font-size:12px">View All</a>
+            </div>
+            {% if recent_apps %}
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Company</th>
+                        <th>Role</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for app in recent_apps %}
+                    <tr>
+                        <td style="color:var(--text-primary);font-weight:500">{{ app.student_name }}</td>
+                        <td>{{ app.company_name }}</td>
+                        <td>{{ app.job_title }}</td>
+                        <td style="font-size:12px">{{ app.applied_date }}</td>
+                        <td><span class="badge-custom badge-{{ app.status }}">{{ app.status.title() }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div style="padding:40px;text-align:center;color:var(--text-muted)">
+                <i class="bi bi-inbox" style="font-size:40px;display:block;margin-bottom:12px"></i>
+                No applications yet
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

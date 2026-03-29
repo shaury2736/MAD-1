@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block title %}Manage Companies – PlaceIITM{% endblock %}
+{% block page_title %}Companies{% endblock %}
+
+{% block content %}
+<div class="data-card">
+    <div class="data-card-header">
+        <div class="data-card-title">All Companies</div>
+        <form method="GET" class="search-bar">
+            <input type="text" name="q" value="{{ q }}" class="search-input" placeholder="Search by name or ID…">
+            <button type="submit" class="btn-accent"><i class="bi bi-search"></i> Search</button>
+            {% if q %}<a href="{{ url_for('admin_companies') }}" class="btn-ghost">Clear</a>{% endif %}
+        </form>
+    </div>
+
+    {% if companies %}
+    <table class="custom-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Company</th>
+                <th>Email</th>
+                <th>Industry</th>
+                <th>HR Contact</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in companies %}
+            <tr>
+                <td style="color:var(--text-muted);font-size:12px">#{{ c.id }}</td>
+                <td style="color:var(--text-primary);font-weight:600">
+                    <div>{{ c.company_name }}</div>
+                    {% if c.website %}<div style="font-size:11px;color:var(--accent-light)"><a href="{{ c.website }}" target="_blank" style="color:inherit;text-decoration:none">{{ c.website[:30] }}...</a></div>{% endif %}
+                </td>
+                <td>{{ c.email }}</td>
+                <td>{{ c.industry or '—' }}</td>
+                <td>{{ c.hr_contact or '—' }}</td>
+                <td><span class="badge-custom badge-{{ c.approval_status }}">{{ c.approval_status.title() }}</span></td>
+                <td>
+                    <div style="display:flex;gap:6px;flex-wrap:wrap">
+                        {% if c.approval_status == 'pending' %}
+                        <form method="POST" action="{{ url_for('admin_company_action', cid=c.id) }}" style="display:inline">
+                            <input type="hidden" name="action" value="approve">
+                            <button type="submit" class="btn-success-ghost"><i class="bi bi-check-lg"></i> Approve</button>
+                        </form>
+                        <form method="POST" action="{{ url_for('admin_company_action', cid=c.id) }}" style="display:inline">
+                            <input type="hidden" name="action" value="reject">
+                            <button type="submit" class="btn-danger-ghost"><i class="bi bi-x-lg"></i> Reject</button>
+                        </form>
+                        {% elif c.approval_status == 'approved' %}
+                        <form method="POST" action="{{ url_for('admin_company_action', cid=c.id) }}" style="display:inline">
+                            <input type="hidden" name="action" value="blacklist">
+                            <button type="submit" class="btn-danger-ghost"><i class="bi bi-slash-circle"></i> Blacklist</button>
+                        </form>
+                        {% elif c.approval_status in ['rejected', 'blacklisted'] %}
+                        <form method="POST" action="{{ url_for('admin_company_action', cid=c.id) }}" style="display:inline">
+                            <input type="hidden" name="action" value="activate">
+                            <button type="submit" class="btn-success-ghost"><i class="bi bi-arrow-counterclockwise"></i> Activate</button>
+                        </form>
+                        {% endif %}
+                        <form method="POST" action="{{ url_for('admin_company_delete', cid=c.id) }}" style="display:inline" onsubmit="return confirm('Delete this company?')">
+                            <button type="submit" class="btn-danger-ghost"><i class="bi bi-trash3"></i></button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div style="padding:60px;text-align:center;color:var(--text-muted)">
+        <i class="bi bi-building" style="font-size:48px;display:block;margin-bottom:16px"></i>
+        No companies found{% if q %} for "{{ q }}"{% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
